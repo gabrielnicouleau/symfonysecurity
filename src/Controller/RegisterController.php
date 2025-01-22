@@ -14,14 +14,19 @@ use Doctrine\DBAL\Driver\PDO\PDOException;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\DBAL\Driver\PDO\Exception;
+use App\Service\EmailService;
+use App\Service\UtilsService;
+use SebastianBergmann\CodeCoverage\Report\Html\Renderer;
 
 final class RegisterController extends AbstractController
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly EmailService $emailService
     ){}
-
+    
+    //Méthode pour ajouter un compte
     #[Route('/register', name: 'app_register')]
     public function addUser(Request $request): Response
     {
@@ -41,7 +46,12 @@ final class RegisterController extends AbstractController
                     $user->setActived(false);
                     $user->setRoles(["ROLE_USER"]);
                     $this->em->persist($user);
-                    $this->em->flush(); 
+                    $this->em->flush();
+                    $objet = "Activation de votre compte";
+                    $body = $this->render('email/activation.html.twig', [
+                        'id'=>base64_encode($user->getId())
+                    ]);
+                    $this->emailService->sendEmail($user->getEmail(),$objet,$body->getContent()); 
                     $type = "success";
                     $msg = "Le compte " . $user->getEmail() . " a été ajouté en BDD";    
                 }
@@ -61,5 +71,29 @@ final class RegisterController extends AbstractController
             'formulaire' => $form
         ]);
     }
+
+
+    //Méthode pour activer un compte
+    #[Route('/register/activate/{id}', name:'app_register_activate')]
+    public function activeUser($id) : Response {
+        $id = base64_decode($id);
+        $user = $this->userRepository->find((int) $id);
+        //Test si le compte existe
+        if($user) {
+            //Test si le compte n'est pas activé
+            if(!$user->isActived()) {
+                //Activer le compte
+                $user->setActived(true);
+                $this->em->persist($user);
+                $this->em->flush();
+                return new Response('Le compte a été activé avec succès', 200);
+            }
+            //Si le compte est déja activé
+            return new Response('Le compte a déja été activé', 200);
+        }
+        //Le compte n'existe pas
+        return new Response('Le compte n\'est pas valide', 400);
+    }
 }
+
 

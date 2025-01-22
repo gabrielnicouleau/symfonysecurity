@@ -21,9 +21,8 @@ final class HomeController extends AbstractController
     #[Route('/test', name:'app_home_test')]
     public function testSmtp(EmailService $emailService) :Response {
         $objet = "Mail pour tester la méthode sendEmail";
-        
         $corps = "Ceci est un email pour tester la méthode sendEmail de mon projet";
-        $destinataire = "nicouleau_gabriel@outlook.com";
+        $destinataire = "saisir votre email";
         $body = $this->render('email/modele.html.twig', [
             'subject' => $objet,
             'body' => $corps,
