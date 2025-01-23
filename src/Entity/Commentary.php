@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CommentaryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommentaryRepository::class)]
 class Commentary
@@ -14,15 +15,18 @@ class Commentary
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['article:readAll'])]
     private ?string $message = null;
 
     #[ORM\Column]
+    #[Groups(['article:readAll'])]
     private ?\DateTimeImmutable $createAt = null;
 
     #[ORM\Column]
     private ?bool $status = null;
 
     #[ORM\ManyToOne]
+    #[Groups(['article:readAll'])]
     private ?User $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentaries')]

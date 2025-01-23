@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -16,31 +17,38 @@ class Article
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 100)]
+    #[Groups(['article:readAll'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['article:readAll'])]
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Groups(['article:readAll'])]
     private ?\DateTimeImmutable $createAt = null;
 
     #[ORM\Column]
     private ?bool $status = null;
 
-    #[ORM\ManyToOne]
-    private ?User $author = null;
-
     /**
      * @var Collection<int, Category>
      */
     #[ORM\ManyToMany(targetEntity: Category::class)]
+    #[Groups(['article:readAll'])]
+ 
     private Collection $categories;
+
+    #[ORM\ManyToOne]
+    #[Groups(['article:readAll'])]
+    private ?User $author = null;
 
     /**
      * @var Collection<int, Commentary>
      */
     #[ORM\OneToMany(targetEntity: Commentary::class, mappedBy: 'article')]
+    #[Groups(['article:readAll'])]
     private Collection $commentaries;
 
     public function __construct()
@@ -102,18 +110,6 @@ class Article
         return $this;
     }
 
-    public function getAuthor(): ?User
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(?User $author): static
-    {
-        $this->author = $author;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Category>
      */
@@ -134,6 +130,18 @@ class Article
     public function removeCategory(Category $category): static
     {
         $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }

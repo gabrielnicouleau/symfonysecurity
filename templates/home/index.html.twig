@@ -5,7 +5,15 @@
 {% block body %}
     {% for messages in app.flashes %}
         {% for message in messages %}
-            <h2>{{ message }}</h2>
+            <h2 id="error">{{ message }}</h2>
         {% endfor %}
     {% endfor %}
+<script>
+    setTimeout(()=>{
+        const errorZone = document.querySelector("#error");
+        if(errorZone.textContent == "Le compte n'est pas activé") {
+            document.location.href= "https://127.0.0.1:8000/logout";
+        }
+    }, 2000);
+</script>
 {% endblock %}
